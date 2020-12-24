@@ -8,7 +8,6 @@
 #include <boost/log/utility/setup/console.hpp>
 #include <csignal>
 #include <hash.hpp>
-
 namespace logging = boost::log;
 namespace sinks = logging::sinks;
 namespace keywords = logging::keywords;
