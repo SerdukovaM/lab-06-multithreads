@@ -1,7 +1,7 @@
 // Copyright 2020 Burylov Denis <burylov01@mail.ru>
 
-#ifndef LAB_06_MULTITHREADS_HASH_HPP
-#define LAB_06_MULTITHREADS_HASH_HPP
+#ifndef INCLUDE_HASH_HPP_
+#define INCLUDE_HASH_HPP_
 
 #include <picosha2.h>
 
@@ -14,31 +14,30 @@
 #include <thread>
 #include <vector>
 
-using namespace nlohmann;
 std::mutex mut;
 
 class Hash {
   std::string data_, hash_;
-  long time_;
+  int64_t time_;
 
  public:
-  Hash(const std::string& data)
+  explicit Hash(const std::string& data)
       : data_(data), hash_(picosha2::hash256_hex_string(data)), time_(0) {}
 
   bool check() { return hash_.substr(hash_.size() - 4, 4) == "0000"; }
 
-  void set_time(const long& time) { time_ = time; }
+  void set_time(const int64_t& time) { time_ = time; }
 
   const std::string& data() { return data_; }
 
   const std::string& hash() { return hash_; }
 
-  const long& time() { return time_; }
+  const int64_t& time() { return time_; }
 };
 std::vector<Hash> hash_array;
-
 void find_hash(std::atomic_bool* shutdown) {
   srand(time(NULL));
+
   auto begin = std::chrono::steady_clock::now();
   for (;;) {
     Hash hash{std::to_string(rand())};
@@ -66,10 +65,10 @@ void find_hash(std::atomic_bool* shutdown) {
   }
 }
 
-json to_json_hash(const std::vector<Hash>& vec) {
-  json vector = json::array();
+nlohmann::json to_json_hash(const std::vector<Hash>& vec) {
+  nlohmann::json vector = nlohmann::json::array();
   for (auto hash : vec) {
-    json j;
+    nlohmann::json j;
     j["timestamp"] = hash.time();
     j["hash"] = hash.hash();
     j["data"] = hash.data();
@@ -79,8 +78,8 @@ json to_json_hash(const std::vector<Hash>& vec) {
 }
 
 void write_to_file(std::ofstream& out, const std::vector<Hash>& vec) {
-  json j = to_json_hash(vec);
+  nlohmann::json j = to_json_hash(vec);
   out << std::setw(4) << j;
 }
 
-#endif  // LAB_06_MULTITHREADS_HASH_HPP
+#endif  // INCLUDE_HASH_HPP_
