@@ -64,8 +64,8 @@ int main(int argc, char* argv[]) {
   }
   BOOST_LOG_TRIVIAL(info) << threads_count << " threads";
   BOOST_LOG_TRIVIAL(info) << "File: " << file;
-
   static ::std::atomic_bool shutdown = false;
+#ifdef __APPLE__
   {
     sig_t handler = [](int const signal) {
       BOOST_LOG_TRIVIAL(info)
@@ -76,8 +76,19 @@ int main(int argc, char* argv[]) {
     bsd_signal(SIGSTOP, handler);
     bsd_signal(SIGTERM, handler);
   }
+#elif
+  {
+    __sighandler_t handler = [](int const signal) {
+      BOOST_LOG_TRIVIAL(info)
+          << "Shutting down due to signal " << signal << std::endl;
+      shutdown = true;
+    };
+    sysv_signal(SIGINT, handler);
+    sysv_signal(SIGSTOP, handler);
+    sysv_signal(SIGTERM, handler);
+  }
+#endif
   auto* p_shutdown = &shutdown;
-
   std::vector<boost::thread> threads;
   for (size_t i = 0; i < threads_count; i++) {
     threads.emplace_back(boost::thread{find_hash, p_shutdown});
