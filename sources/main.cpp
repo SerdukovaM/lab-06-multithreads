@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     bsd_signal(SIGSTOP, handler);
     bsd_signal(SIGTERM, handler);
   }
-#elif
+#else
   {
     __sighandler_t handler = [](int const signal) {
       BOOST_LOG_TRIVIAL(info)
