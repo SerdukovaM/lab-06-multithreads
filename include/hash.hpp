@@ -37,11 +37,12 @@ class Hash {
 };
 std::vector<Hash> hash_array;
 void find_hash(std::atomic_bool* shutdown) {
-  srand(time(NULL));
-
+  //srand(time(NULL));
+  std::random_device rd;
+  std::mt19937 mersenne(rd());
   auto begin = std::chrono::steady_clock::now();
   for (;;) {
-    Hash hash{std::to_string(rand())};
+    Hash hash{std::to_string(mersenne())};
     if (hash.check()) {
       BOOST_LOG_TRIVIAL(info)
           << "Thread id: " << std::this_thread::get_id()
@@ -78,7 +79,7 @@ nlohmann::json to_json_hash(const std::vector<Hash>& vec) {
   return vector;
 }
 
-void write_to_file(std::ofstream& out, const std::vector<Hash>& vec) {
+void write_to_file(std::ostream& out, const std::vector<Hash>& vec) {
   nlohmann::json j = to_json_hash(vec);
   out << std::setw(4) << j;
 }
